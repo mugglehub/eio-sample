@@ -2,7 +2,7 @@
 ## Introduction
 The EIO is an embedded controller by Advantech.
 
-Th eio-sample shows how to access an embedded controller for getting hardware monitor data or using function implemented by EC.
+The eio-sample shows how to access an embedded controller for getting hardware monitor data or using function implemented by EC.
 
 ## Application
 
