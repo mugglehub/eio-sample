@@ -8,14 +8,19 @@ The eio-sample shows how to access an embedded controller for getting hardware m
 
 | apps | Function |
 | ---- | --------- |
-|curr| Showing current data|
-|ecram| Showing ACPI EC RAM data|
-|fan| Showing fan data|
-|gpio| Getting/Setting General Purpose I/O Pin|
+|caseopen| Showing caseopen status |
+|curr| Showing current data |
+|ecram| Showing ACPI EC RAM data |
+|fan| Showing fan data |
+|gpio| Getting/Setting General Purpose I/O Pin |
+|panel| Showing panel status (back-light etc.) |
+|pwm| Showing PWM status |
+|storage| Getting/Setting storage |
+|tach| Showing tachometer status |
 |therm| Showing thermal data |
-|ver| Showing version information|
-|volt| Showing voltage data|
-|wdt| Getting/Setting watchdog|
+|ver| Showing version information |
+|volt| Showing voltage data |
+|wdt| Getting/Setting watchdog |
 
 ## Watchdog
 ### Watchdog with delay
