@@ -9,25 +9,25 @@
 #include "../../eio/eio.h"
 
 //=============================================================================
-//  eio_show_volt
+//  eio_show_tach
 //=============================================================================
-void eio_show_volt(void)
+void eio_show_tach(void)
 {
 	int			i;
 	uint8_t		res;
 	uint8_t		data8;
-	uint16_t	data16;
+	uint32_t	data32;
 
 	eio_fw_prt_t	prt;
 
 	fprintf(stderr, "==================================\n");
-	fprintf(stderr, "           EIO Voltage\n");
+	fprintf(stderr, "           EIO TACH\n");
 	fprintf(stderr, "==================================\n");
 
-	for (i=0; i<EIO_MAX_VOLT; i++)
+	for (i=0; i<EIO_MAX_TACH; i++)
 	{
-	
-		prt.cmd = 0x13;
+		// checking TACH available
+		prt.cmd = 0x17;
 		prt.ctl = 0x00;
 		prt.dev = (uint8_t)i;
 		prt.len = 1;
@@ -39,14 +39,14 @@ void eio_show_volt(void)
 
 		if ((prt.buf[0] & 0x01) == 0)
 		{
-			fprintf(stderr, "VOLT%d > \n  n/a\n", i);
+			fprintf(stderr, "TACH%d > \n  n/a\n", i);
 			continue;
 		}
 
-		fprintf(stderr, "VOLT%d >\n", i);
+		fprintf(stderr, "TACH%d >\n", i);
 
 		// type
-		prt.cmd = 0x13;
+		prt.cmd = 0x17;
 		prt.ctl = 0x01;
 		prt.dev = (uint8_t)i;
 		prt.len = 1;
@@ -58,22 +58,36 @@ void eio_show_volt(void)
 			fprintf(stderr, "0x%02X\n", data8);
 		else
 			fprintf(stderr, "error, res=%d\n", res);
-		
-		// value
-		prt.cmd = 0x13;
-		prt.ctl = 0x10;
+
+		// pulse
+		prt.cmd = 0x17;
+		prt.ctl = 0x03;
 		prt.dev = (uint8_t)i;
-		prt.len = 2;
+		prt.len = 1;
 		res = eio_fw_read_prt(&prt);
 
-		fprintf(stderr, "  Value: ");
-		data16 = *(uint16_t *)prt.buf;
-		// unit: 10mV
+		fprintf(stderr, "  Pulse: ");
+		data8 = *(uint8_t *)prt.buf;
 		if (res == EIO_OK)
-			fprintf(stderr, "0x%04X = %d mV = %d.%02d V\n", data16, data16*10, data16/100, data16%100);
+			fprintf(stderr, "0x%02X\n", data8);
+		else
+			fprintf(stderr, "error, res=%d\n", res);
+
+		// rpm
+		prt.cmd = 0x17;
+		prt.ctl = 0x10;
+		prt.dev = (uint8_t)i;
+		prt.len = 4;
+		res = eio_fw_read_prt(&prt);
+
+		fprintf(stderr, "  RPM:   ");
+		data32 = *(uint32_t *)prt.buf;
+		if (res == EIO_OK)
+			fprintf(stderr, "0x%X = %d RPM\n", data32, data32);
 		else
 			fprintf(stderr, "error, res=%d\n", res);
 	}
+
 }
 
 //=============================================================================
@@ -88,7 +102,7 @@ uint8_t main(void)
 	if (res)
 		return res;
 
-	eio_show_volt();
+	eio_show_tach();
 
 	eio_exit();
 

@@ -41,6 +41,22 @@
 
 #define EIO_LDN_GPIO	0x24
 
+
+// number of devices
+#define EIO_MAX_CASEOPEN	(1)
+#define EIO_MAX_CURR		(2)
+#define EIO_MAX_FAN			(4)
+#define EIO_MAX_PANEL		(2)
+#define EIO_MAX_PWM			(3)
+#define EIO_MAX_TACH		(2)
+#define EIO_MAX_THERM		(4)
+#define EIO_MAX_VOLT		(8)
+
+
+// error code
+#define EIO_OK			0
+#define EIO_ERR			1
+
 //=============================================================================
 //  eio_fw_prt_t : EIO f/w protocol
 //=============================================================================

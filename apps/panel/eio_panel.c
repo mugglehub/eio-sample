@@ -9,25 +9,24 @@
 #include "../../eio/eio.h"
 
 //=============================================================================
-//  eio_show_volt
+//  eio_show_panel
 //=============================================================================
-void eio_show_volt(void)
+void eio_show_panel(void)
 {
 	int			i;
 	uint8_t		res;
 	uint8_t		data8;
-	uint16_t	data16;
 
 	eio_fw_prt_t	prt;
 
 	fprintf(stderr, "==================================\n");
-	fprintf(stderr, "           EIO Voltage\n");
+	fprintf(stderr, "           EIO Panel\n");
 	fprintf(stderr, "==================================\n");
 
-	for (i=0; i<EIO_MAX_VOLT; i++)
+	for (i=0; i<EIO_MAX_PANEL; i++)
 	{
-	
-		prt.cmd = 0x13;
+		// checking panel available
+		prt.cmd = 0x21;
 		prt.ctl = 0x00;
 		prt.dev = (uint8_t)i;
 		prt.len = 1;
@@ -39,42 +38,42 @@ void eio_show_volt(void)
 
 		if ((prt.buf[0] & 0x01) == 0)
 		{
-			fprintf(stderr, "VOLT%d > \n  n/a\n", i);
+			fprintf(stderr, "PANEL%d > \n  n/a\n", i);
 			continue;
 		}
 
-		fprintf(stderr, "VOLT%d >\n", i);
+		fprintf(stderr, "PANEL%d >\n", i);
 
-		// type
-		prt.cmd = 0x13;
-		prt.ctl = 0x01;
+		// duty cycle
+		prt.cmd = 0x21;
+		prt.ctl = 0x14;
 		prt.dev = (uint8_t)i;
 		prt.len = 1;
 		res = eio_fw_read_prt(&prt);
 
-		fprintf(stderr, "  Type:  ");
+		fprintf(stderr, "  Duty:     ");
 		data8 = *(uint8_t *)prt.buf;
 		if (res == EIO_OK)
-			fprintf(stderr, "0x%02X\n", data8);
+			fprintf(stderr, "0x%02X = %d %%\n", data8, data8);
 		else
 			fprintf(stderr, "error, res=%d\n", res);
 		
-		// value
-		prt.cmd = 0x13;
-		prt.ctl = 0x10;
+		// polarity
+		prt.cmd = 0x21;
+		prt.ctl = 0x15;
 		prt.dev = (uint8_t)i;
-		prt.len = 2;
+		prt.len = 1;
 		res = eio_fw_read_prt(&prt);
 
-		fprintf(stderr, "  Value: ");
-		data16 = *(uint16_t *)prt.buf;
-		// unit: 10mV
+		fprintf(stderr, "  Polarity: ");
+		data8 = *(uint8_t *)prt.buf;
 		if (res == EIO_OK)
-			fprintf(stderr, "0x%04X = %d mV = %d.%02d V\n", data16, data16*10, data16/100, data16%100);
+			fprintf(stderr, "%d\n", data8);
 		else
 			fprintf(stderr, "error, res=%d\n", res);
 	}
 }
+
 
 //=============================================================================
 //  main
@@ -88,7 +87,7 @@ uint8_t main(void)
 	if (res)
 		return res;
 
-	eio_show_volt();
+	eio_show_panel();
 
 	eio_exit();
 

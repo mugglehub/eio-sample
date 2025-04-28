@@ -13,8 +13,9 @@
 //=============================================================================
 void eio_show_therm(void)
 {
-	int			i, j;
+	int			i;
 	uint8_t		res;
+	uint8_t		data8;
 	uint16_t	data16;
 	uint8_t		sht_act;
 	uint16_t	sht_high, sht_low;
@@ -25,7 +26,7 @@ void eio_show_therm(void)
 	fprintf(stderr, "           EIO Thermal\n");
 	fprintf(stderr, "==================================\n");
 
-	for (i=0; i<4; i++)
+	for (i=0; i<EIO_MAX_THERM; i++)
 	{
 	
 		prt.cmd = 0x11;
@@ -37,12 +38,30 @@ void eio_show_therm(void)
 
 		if (res)
 			continue;
-
+		
 		if ((prt.buf[0] & 0x01) == 0)
-			continue;	// n/a
+		{
+			fprintf(stderr, "THERM%d > \n  n/a\n", i);
+			continue;
+		}
 
-		fprintf(stderr, "THERM: %d\n", i);
+		fprintf(stderr, "THERM%d >\n", i);
 
+		// type
+		prt.cmd = 0x11;
+		prt.ctl = 0x01;
+		prt.dev = (uint8_t)i;
+		prt.len = 1;
+		res = eio_fw_read_prt(&prt);
+
+		fprintf(stderr, "  Type:  ");
+		data8 = *(uint8_t *)prt.buf;
+		if (res == EIO_OK)
+			fprintf(stderr, "0x%02X\n", data8);
+		else
+			fprintf(stderr, "error, res=%d\n", res);
+
+		// value
 		prt.cmd = 0x11;
 		prt.ctl = 0x10;
 		prt.dev = (uint8_t)i;
@@ -50,12 +69,12 @@ void eio_show_therm(void)
 
 		res = eio_fw_read_prt(&prt);
 
-		if (!res)
-		{
-			data16 = *(uint16_t *)prt.buf;
-			fprintf(stderr, "  Value: 0x%04X = %d.%d C\n", 
-					data16, (data16-2731)/10, (data16-2731)%10);
-		}
+		fprintf(stderr, "  Value: ");
+		data16 = *(uint16_t *)prt.buf;
+		if (res == EIO_OK)
+			fprintf(stderr, "0x%04X = %d.%d K = %d.%d C\n", data16, data16/10, data16%10, (data16-2731)/10, (data16-2731)%10);
+		else
+			fprintf(stderr, "error, res=%d\n", res);
 
 		//-----------------------------------------------------------
 		//  TP : SHT
@@ -96,11 +115,11 @@ void eio_show_therm(void)
 		if (!res)
 			sht_low = *(uint16_t *)prt.buf;
 
-		fprintf(stderr, "   Act: 0x%02X\n", sht_act);
+		fprintf(stderr, "    Act: 0x%02X\n", sht_act);
 
-		fprintf(stderr, "  High: 0x%04X = %d.%d C\n", 
+		fprintf(stderr, "   High: 0x%04X = %d.%d C\n", 
 				sht_high, (sht_high-2731)/10, (sht_high-2731)%10);
-		fprintf(stderr, "   Low: 0x%04X = %d.%d C\n", 
+		fprintf(stderr, "    Low: 0x%04X = %d.%d C\n", 
 				sht_low, (sht_low-2731)/10, (sht_low-2731)%10);
 	}
 }

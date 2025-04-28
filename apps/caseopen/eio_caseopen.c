@@ -9,25 +9,24 @@
 #include "../../eio/eio.h"
 
 //=============================================================================
-//  eio_show_volt
+//  eio_show_caseopen
 //=============================================================================
-void eio_show_volt(void)
+void eio_show_caseopen(void)
 {
 	int			i;
 	uint8_t		res;
 	uint8_t		data8;
-	uint16_t	data16;
 
 	eio_fw_prt_t	prt;
 
 	fprintf(stderr, "==================================\n");
-	fprintf(stderr, "           EIO Voltage\n");
+	fprintf(stderr, "           EIO Caseopen\n");
 	fprintf(stderr, "==================================\n");
 
-	for (i=0; i<EIO_MAX_VOLT; i++)
+	for (i=0; i<EIO_MAX_CASEOPEN; i++)
 	{
-	
-		prt.cmd = 0x13;
+		// checking current available
+		prt.cmd = 0x29;
 		prt.ctl = 0x00;
 		prt.dev = (uint8_t)i;
 		prt.len = 1;
@@ -39,40 +38,47 @@ void eio_show_volt(void)
 
 		if ((prt.buf[0] & 0x01) == 0)
 		{
-			fprintf(stderr, "VOLT%d > \n  n/a\n", i);
+			fprintf(stderr, "CASEOPEN%d > \n  n/a\n", i);
 			continue;
 		}
 
-		fprintf(stderr, "VOLT%d >\n", i);
+		fprintf(stderr, "CASEOPEN%d >\n", i);
 
-		// type
-		prt.cmd = 0x13;
-		prt.ctl = 0x01;
+		// case open control/status
+		prt.cmd = 0x29;
+		prt.ctl = 0x02;
 		prt.dev = (uint8_t)i;
 		prt.len = 1;
 		res = eio_fw_read_prt(&prt);
 
-		fprintf(stderr, "  Type:  ");
 		data8 = *(uint8_t *)prt.buf;
 		if (res == EIO_OK)
-			fprintf(stderr, "0x%02X\n", data8);
+		{
+			if (data8 & 0x80)
+			{
+				fprintf(stderr, "Status : n/a\n");
+			}
+			else
+			{
+				fprintf(stderr, "Status : 0x%02X\n", data8);
+				
+				fprintf(stderr, "Switch : ");
+				if (data8 & 0x01)
+					fprintf(stderr, "Opened\n");
+				else
+					fprintf(stderr, "Closed\n");
+			
+				fprintf(stderr, "Power  : ");
+				if (data8 & 0x02)
+					fprintf(stderr, "Failed\n");
+				else
+					fprintf(stderr, "Good\n");
+			}
+		}
 		else
+		{
 			fprintf(stderr, "error, res=%d\n", res);
-		
-		// value
-		prt.cmd = 0x13;
-		prt.ctl = 0x10;
-		prt.dev = (uint8_t)i;
-		prt.len = 2;
-		res = eio_fw_read_prt(&prt);
-
-		fprintf(stderr, "  Value: ");
-		data16 = *(uint16_t *)prt.buf;
-		// unit: 10mV
-		if (res == EIO_OK)
-			fprintf(stderr, "0x%04X = %d mV = %d.%02d V\n", data16, data16*10, data16/100, data16%100);
-		else
-			fprintf(stderr, "error, res=%d\n", res);
+		}
 	}
 }
 
@@ -88,7 +94,7 @@ uint8_t main(void)
 	if (res)
 		return res;
 
-	eio_show_volt();
+	eio_show_caseopen();
 
 	eio_exit();
 

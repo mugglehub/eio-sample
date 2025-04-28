@@ -202,7 +202,7 @@ void eio_fw_ver(void)
 		res = eio_fw_read_prt(&prt);
 
 		if (!res)
-			fprintf(stderr, "          EAPI ID : %d = 0x%08X\n", *(uint32_t *)prt.buf, *(uint32_t *)prt.buf);
+			fprintf(stderr, "          EAPI ID : %u = 0x%08X\n", *(uint32_t *)prt.buf, *(uint32_t *)prt.buf);
 		else
 			fprintf(stderr, "get eapi id err!\n");
 	}
