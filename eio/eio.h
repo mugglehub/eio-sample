@@ -41,6 +41,9 @@
 
 #define EIO_LDN_GPIO	0x24
 
+#define EIO_CHIPID_IS200	0x9610
+#define EIO_CHIPID_201		0x9620
+
 
 // number of devices
 #define EIO_MAX_CASEOPEN	(1)
@@ -54,8 +57,9 @@
 
 
 // error code
-#define EIO_OK			0
-#define EIO_ERR			1
+#define EIO_OK				0
+#define EIO_ERR				1
+#define EIO_ERR_CHIPID		2
 
 //=============================================================================
 //  eio_fw_prt_t : EIO f/w protocol

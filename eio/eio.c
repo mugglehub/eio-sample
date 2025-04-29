@@ -302,6 +302,10 @@ void eio_gpio_exit(void)
 //=============================================================================
 uint8_t eio_init(void)
 {
+	uint8_t		lsb;
+	uint8_t		msb;
+	uint16_t	chipid;
+
 	if (ioperm(0x299, 2, 1))
 	{
 		perror("ioperm port 299h");
@@ -326,7 +330,31 @@ uint8_t eio_init(void)
 		return 0xFC;
 	}
 
-	return 0;
+	// enter cfg
+	outb(0x87, EIO_CFG_IDX);
+	outb(0x87, EIO_CFG_IDX);
+
+	// chip id
+	outb(0x20, EIO_CFG_IDX);
+	msb = inb(EIO_CFG_DAT);
+
+	outb(0x21, EIO_CFG_IDX);
+	lsb = inb(EIO_CFG_DAT);
+
+	chipid = (uint16_t)msb;
+	chipid <<= 8;
+	chipid |= (uint16_t)lsb;
+
+	// exit cfg
+	outb(0xAA, EIO_CFG_IDX);
+
+	if (chipid != EIO_CHIPID_IS200 && chipid != EIO_CHIPID_201)
+	{
+		eio_exit();
+		return EIO_ERR_CHIPID;
+	}
+
+	return EIO_OK;
 }
 
 //=============================================================================
